@@ -1,4 +1,3 @@
----
 
 **中文**
 
@@ -14,7 +13,7 @@
 
 因原始型号缺失、格式异常、规则适用差异、人工录入偏差、特殊项目要求或未经复核直接使用结果所产生的任何选型偏差、采购损失、交付延误、质量争议或其他直接/间接后果，本应用及其开发者不承担责任。使用本应用即表示用户已充分理解并接受上述条款。
 
----
+
 
 **English**
 
@@ -30,7 +29,6 @@ Before using any result, users must verify it against the latest datasheets, off
 
 The application and its developer shall not be liable for any selection errors, procurement losses, delivery delays, quality disputes, or any direct or indirect consequences arising from incomplete source data, irregular formatting, rule applicability differences, manual input errors, special project requirements, or unverified use of generated results. By using this application, the user acknowledges and accepts these terms.
 
----
 
 **日本語**
 
@@ -46,7 +44,6 @@ The application and its developer shall not be liable for any selection errors, 
 
 原型番の欠落、形式異常、規則適用の差異、入力ミス、特殊なプロジェクト要求、または未確認のまま結果を使用したことにより生じたいかなる選定誤り、購買損失、納期遅延、品質紛争、その他直接または間接的な損害についても、本アプリケーションおよび開発者は責任を負いません。本アプリケーションの使用により、ユーザーは本条件を理解し同意したものとみなされます。
 
----
 
 **한국어**
 
@@ -62,7 +59,7 @@ The application and its developer shall not be liable for any selection errors, 
 
 원본 모델명의 누락, 비정상적인 형식, 규칙 적용 차이, 수기 입력 오류, 특수 프로젝트 요구사항 또는 검증되지 않은 결과의 직접 사용으로 인해 발생하는 선정 오류, 구매 손실, 납기 지연, 품질 분쟁 및 기타 직간접적 결과에 대해 본 애플리케이션 및 개발자는 책임을 지지 않습니다. 본 애플리케이션을 사용하는 것은 위 조건을 이해하고 동의한 것으로 간주됩니다.
 
----
+
 
 **Русский**
 
