@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>型号转换小程序</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #1f2933;
+      --muted: #5f6c7b;
+      --line: #d8dee6;
+      --accent: #0f766e;
+      --accent-dark: #0b5f59;
+      --warn: #a15c07;
+      --bad: #b42318;
+      --good: #067647;
+      --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    main {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 36px;
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 54px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 6px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    button.primary:hover {
+      background: var(--accent-dark);
+      color: #fff;
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 520px;
+      resize: vertical;
+      border: 0;
+      padding: 16px;
+      color: var(--text);
+      font: 15px/1.55 Consolas, "Microsoft YaHei", monospace;
+      outline: none;
+      background: #fff;
+    }
+
+    #output {
+      background: #fbfcfd;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 38px;
+      padding: 8px 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status strong {
+      color: var(--good);
+      font-weight: 700;
+    }
+
+    .status .warn {
+      color: var(--warn);
+    }
+
+    .tips {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .tips code {
+      color: var(--text);
+      background: #eef2f6;
+      border: 1px solid #dce3ea;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: Consolas, monospace;
+    }
+
+    @media (max-width: 820px) {
+      main {
+        width: min(100vw - 20px, 1180px);
+        padding-top: 18px;
+      }
+
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .meta {
+        white-space: normal;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      textarea {
+        min-height: 320px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>型号转换小程序</h1>
+      <div class="meta">陶瓷电容标准型号输出</div>
+    </header>
+
+    <div class="workspace">
+      <section>
+        <div class="section-head">
+          <h2>输入型号</h2>
+          <div class="toolbar">
+            <button id="sampleBtn" type="button">示例</button>
+            <button id="clearBtn" type="button">清空</button>
+            <button id="convertBtn" class="primary" type="button">转换</button>
+          </div>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="每行输入一个型号，例如：0805 X7R 50V 105K"></textarea>
+        <div class="status">
+          <span id="inputCount">0 行</span>
+          <span>支持批量粘贴</span>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <h2>转换结果</h2>
+          <div class="toolbar">
+            <button id="copyBtn" type="button">复制结果</button>
+          </div>
+        </div>
+        <textarea id="output" readonly spellcheck="false"></textarea>
+        <div class="status">
+          <span id="resultCount">等待输入</span>
+          <span id="copyState"></span>
+        </div>
+      </section>
+    </div>
+
+    <div class="tips">
+      常见输入：<code>G 0805 X7R 50V 105K</code>、<code>普军 1210-CG-1000V-220J</code>、<code>TAJD476K025RNJ</code>、<code>CA45-A-20V-100μF-M</code>
+    </div>
+  </main>
+
+  <script>
+    const inputEl = document.getElementById("input");
+    const outputEl = document.getElementById("output");
+    const convertBtn = document.getElementById("convertBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const sampleBtn = document.getElementById("sampleBtn");
+    const inputCountEl = document.getElementById("inputCount");
+    const resultCountEl = document.getElementById("resultCount");
+    const copyStateEl = document.getElementById("copyState");
+
+    const sizes = [
+      "01005", "0201", "0402", "0603", "0805", "1206", "1210", "1808",
+      "1812", "1825", "2220", "2225", "2520", "3640", "3838", "4040"
+    ];
+    const materials = [
+      "X7R", "X5R", "X7S", "X5S", "X8R", "X8L", "2X1", "2C1", "2R1",
+      "CG", "C0G", "COG", "NP0", "NPO"
+    ];
+    const precisionLetters = "BCDFGJKMZ";
+    const tantalumCases = ["A", "B", "C", "D", "D1", "E", "F", "H", "Y", "Z"];
+
+    function normalizeText(value) {
+      return value
+        .replace(/\u00b5/g, "μ")
+        .replace(/[\u4e00-\u9fff丨|｜]+/g, " ")
+        .replace(/μF/gi, "μF")
+        .replace(/[－—–]/g, "-")
+        .replace(/（/g, "(")
+        .replace(/）/g, ")")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function normalizeForSearch(value) {
+      return normalizeText(value)
+        .toUpperCase()
+        .replace(/Μ/g, "μ")
+        .replace(/UF/g, "μF")
+        .replace(/U F/g, "μF")
+        .replace(/PF/g, "pF")
+        .replace(/NF/g, "nF");
+    }
+
+    function findQualityPrefix(raw) {
+      const text = String(raw || "").trim();
+      if (/七专|七專/.test(text)) return "(G) ";
+      if (/普军|普軍/.test(text)) return "\"J\" ";
+      if (/^\s*G(?=C(?:T|C|A)|TAJ|\d)/i.test(text)) return "(G) ";
+      if (/^\s*J(?=C(?:T|C|A)|TAJ|\d)/i.test(text)) return "\"J\" ";
+      if (/^\s*[\(（]?G[\)）]?\s*[-_\\\/ ]/i.test(text)) return "(G) ";
+      if (/^\s*["“”']?J["“”']?\s*[-_\\\/ ]/i.test(text)) return "\"J\" ";
+      return "";
+    }
+
+    function findSize(text) {
+      const compact = text.replace(/[^A-Z0-9]/gi, "");
+      return sizes.find(size => compact.includes(size)) || "";
+    }
+
+    function findMaterial(text) {
+      const upper = text.toUpperCase();
+      const found = materials.find(material => new RegExp("(^|[^A-Z0-9])" + material + "([^A-Z0-9]|$)", "i").test(upper));
+      if (!found) return "";
+      if (found === "C0G" || found === "COG" || found === "NP0" || found === "NPO") return "CG";
+      return found;
+    }
+
+    function findVoltage(text) {
+      const upper = text.toUpperCase();
+      const match = upper.match(/(^|[^A-Z0-9.])(\d+(?:\.\d+)?)\s*(KV|V)(?=$|[^A-Z0-9])/);
+      if (!match) return null;
+      const rawValue = Number(match[2]);
+      if (!Number.isFinite(rawValue)) return null;
+      const volts = match[3] === "KV" ? rawValue * 1000 : rawValue;
+      return { volts, label: formatVoltage(volts) };
+    }
+
+    function formatVoltage(volts) {
+      if (volts >= 1000) {
+        const kv = volts / 1000;
+        return trimNumber(kv) + "KV";
+      }
+      return trimNumber(volts) + "V";
+    }
+
+    function trimNumber(num) {
+      return String(Number(num.toFixed(8))).replace(/\.0$/, "");
+    }
+
+    function eiaToPf(code) {
+      const base = Number(code.slice(0, 2));
+      const zeros = Number(code.slice(2));
+      if (!Number.isFinite(base) || !Number.isFinite(zeros)) return null;
+      return base * Math.pow(10, zeros);
+    }
+
+    function findCapacity(text) {
+      const unified = normalizeText(text)
+        .replace(/UF/gi, "μF")
+        .replace(/uF/gi, "μF")
+        .replace(/PF/gi, "pF")
+        .replace(/NF/gi, "nF");
+
+      const explicit = unified.match(/(^|[^A-Z0-9.])(\d+(?:\.\d+)?)\s*(pF|nF|μF)\s*[-_ ]?\s*([A-Z])?(?=$|[^A-Z0-9])/i);
+      if (explicit) {
+        const value = Number(explicit[2]);
+        const unit = explicit[3];
+        if (!Number.isFinite(value)) return null;
+        let pf = value;
+        if (/nF/i.test(unit)) pf = value * 1000;
+        if (/μF/i.test(unit)) pf = value * 1000000;
+        return { pf, precision: normalizePrecision(explicit[4]) };
+      }
+
+      const eiaWithPrecision = unified.match(/(^|[^A-Z0-9])(\d{3})\s*[-_ ]?\s*([A-Z])(?=$|[^A-Z0-9])/i);
+      if (eiaWithPrecision) {
+        const pf = eiaToPf(eiaWithPrecision[2]);
+        return { pf, precision: normalizePrecision(eiaWithPrecision[3]) };
+      }
+
+      const eiaOnly = findStandaloneEiaCode(unified);
+      if (eiaOnly) {
+        return { pf: eiaToPf(eiaOnly), precision: "" };
+      }
+
+      return null;
+    }
+
+    function isTantalumInput(raw, source) {
+      if (/钽|鉭|CA45|CA55|TAJ/i.test(raw)) return true;
+      return !findSize(source);
+    }
+
+    function findTantalumCase(raw, source) {
+      const text = normalizeText(raw).toUpperCase().replace(/UF/g, "μF");
+      const caseSource = source.replace(/\d+(?:\.\d+)?\s*(?:KV|V|pF|nF|μF)/gi, " ");
+      const caMatch = text.match(/CA(?:45|55)\s*[-_ ]?\s*([A-Z][A-Z0-9]*)/i);
+      if (caMatch) return caMatch[1].toUpperCase();
+
+      const tajMatch = text.match(/TAJ\s*(D1|[A-Z])(?=\d{3})/i);
+      if (tajMatch) return tajMatch[1].toUpperCase();
+
+      for (const caseSize of tantalumCases) {
+        const pattern = new RegExp("(^|[^A-Z0-9])" + caseSize + "(?=$|[^A-Z0-9])", "i");
+        if (pattern.test(caseSource)) return caseSize;
+      }
+
+      const loose = caseSource.match(/(^|[^A-Z0-9])([A-Z][A-Z0-9]*)(?=$|[^A-Z0-9])/i);
+      return loose ? loose[2].toUpperCase() : "";
+    }
+
+    function findTantalumVoltage(raw, source) {
+      const voltage = findVoltage(source);
+      if (voltage) return voltage;
+
+      const tajVoltage = String(raw || "").toUpperCase().match(/TAJ[A-D]\d{3}[A-Z](\d{3})/i);
+      if (tajVoltage) {
+        const volts = Number(tajVoltage[1]);
+        if (Number.isFinite(volts)) return { volts, label: formatVoltage(volts) };
+      }
+      return null;
+    }
+
+    function findTantalumCapacity(raw, source) {
+      const capacity = findCapacity(source);
+      if (capacity) return capacity;
+
+      const tajCapacity = String(raw || "").toUpperCase().match(/TAJ[A-D](\d{3})[A-Z]\d{3}/i);
+      if (tajCapacity) {
+        return { pf: eiaToPf(tajCapacity[1]), precision: "M" };
+      }
+      return null;
+    }
+
+    function findStandaloneEiaCode(text) {
+      const matches = [...text.matchAll(/(^|[^A-Z0-9])(\d{3})(?=$|[^A-Z0-9])/gi)];
+      const voltage = findVoltage(text);
+      for (const match of matches) {
+        const code = match[2];
+        const value = Number(code);
+        if (sizes.includes(code)) continue;
+        if (voltage && Math.abs(voltage.volts - value) < 0.000001) continue;
+        return code;
+      }
+      return "";
+    }
+
+    function normalizePrecision(value) {
+      if (!value) return "";
+      const letter = value.toUpperCase();
+      return precisionLetters.includes(letter) ? letter : "";
+    }
+
+    function findPrecision(text, capacityPrecision) {
+      if (capacityPrecision) return capacityPrecision;
+      const upper = text.toUpperCase();
+      const exact = upper.match(/(^|[^A-Z0-9])([BCDFGJKMZ])(?:\(N\))?(?=$|[^A-Z0-9])/);
+      return exact ? exact[2] : "";
+    }
+
+    function formatCapacity(pf) {
+      if (!Number.isFinite(pf) || pf <= 0) return "";
+      if (pf < 10) return formatAtLeastOneDecimal(pf) + "pF";
+      if (pf < 10000) return String(Math.trunc(pf)) + "pF";
+
+      const uf = pf / 1000000;
+      if (uf < 10) return formatAtLeastOneDecimal(uf) + "μF";
+      if (Number.isInteger(uf)) return String(uf) + "μF";
+      return trimTrailingZeros(uf.toFixed(6)) + "μF";
+    }
+
+    function formatUfCapacity(pf) {
+      if (!Number.isFinite(pf) || pf <= 0) return "";
+      const uf = pf / 1000000;
+      if (uf < 10) return formatAtLeastOneDecimal(uf) + "μF";
+      if (Number.isInteger(uf)) return String(uf) + "μF";
+      return trimTrailingZeros(uf.toFixed(6)) + "μF";
+    }
+
+    function formatAtLeastOneDecimal(num) {
+      const trimmed = trimTrailingZeros(num.toFixed(8));
+      return trimmed.includes(".") ? trimmed : trimmed + ".0";
+    }
+
+    function trimTrailingZeros(value) {
+      return value.replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function convertLine(line) {
+      const qualityPrefix = findQualityPrefix(line);
+      const source = normalizeForSearch(line);
+      if (!source) return "";
+
+      if (isTantalumInput(line, source)) {
+        const caseSize = findTantalumCase(line, source);
+        const voltage = findTantalumVoltage(line, source);
+        const capacity = findTantalumCapacity(line, source);
+        const missing = [];
+        if (!caseSize) missing.push("钽电封装");
+        if (!voltage) missing.push("电压");
+        if (!capacity) missing.push("容量");
+        if (missing.length) {
+          return "无法识别" + missing.join("、") + "：" + line;
+        }
+        return qualityPrefix + ["CA55", caseSize, voltage.label, formatUfCapacity(capacity.pf), "M"].join("-");
+      }
+
+      const size = findSize(source);
+      const material = findMaterial(source);
+      const voltage = findVoltage(source);
+      const capacity = findCapacity(source);
+      const precision = findPrecision(source, capacity && capacity.precision);
+
+      const missing = [];
+      if (!size) missing.push("尺寸");
+      if (!material) missing.push("材质");
+      if (!voltage) missing.push("电压");
+      if (!capacity) missing.push("容量");
+      if (!precision) missing.push("精度");
+
+      if (missing.length) {
+        return "无法识别" + missing.join("、") + "：" + line;
+      }
+
+      const isHighVoltage = voltage.volts >= 1000;
+      const isCg = material === "CG";
+      const series = isHighVoltage ? (isCg ? "CC48" : "CT48") : (isCg ? "CC41" : "CT41G");
+      return qualityPrefix + [
+        series,
+        size,
+        material,
+        voltage.label,
+        formatCapacity(capacity.pf),
+        precision + "(N)"
+      ].join("-");
+    }
+
+    function convertAll() {
+      const lines = inputEl.value.split(/\r?\n/);
+      const converted = lines.map(line => convertLine(line)).filter(Boolean);
+      outputEl.value = converted.join("\n");
+
+      const total = lines.filter(line => line.trim()).length;
+      const failed = converted.filter(line => line.startsWith("无法识别")).length;
+      inputCountEl.textContent = total + " 行";
+      resultCountEl.innerHTML = failed
+        ? "<span class='warn'>" + converted.length + " 条结果，" + failed + " 条需补充</span>"
+        : "<strong>" + converted.length + " 条结果</strong>";
+      copyStateEl.textContent = "";
+    }
+
+    async function copyOutput() {
+      const text = outputEl.value;
+      if (!text) {
+        copyStateEl.textContent = "暂无结果";
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        copyStateEl.textContent = "已复制";
+      } catch {
+        outputEl.focus();
+        outputEl.select();
+        document.execCommand("copy");
+        copyStateEl.textContent = "已复制";
+      }
+    }
+
+    inputEl.addEventListener("input", convertAll);
+    convertBtn.addEventListener("click", convertAll);
+    copyBtn.addEventListener("click", copyOutput);
+    clearBtn.addEventListener("click", () => {
+      inputEl.value = "";
+      outputEl.value = "";
+      convertAll();
+      inputEl.focus();
+    });
+      sampleBtn.addEventListener("click", () => {
+        inputEl.value = [
+        "G 0805 X7R 50V 105K",
+        "普军 1210-CG-1000V-220J",
+        "2220 2X1 3KV 0.47uF K",
+        "TAJD476K025RNJ",
+        "七专级 CA45-A-20V-100μF-M"
+      ].join("\n");
+      convertAll();
+      inputEl.focus();
+    });
+
+    convertAll();
+  </script>
+</body>
+</html>
